@@ -7,6 +7,7 @@
 //
 
 #import "ViewController.h"
+#import "PreLoader.h"
 
 @interface ViewController ()
 
@@ -17,6 +18,10 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
+    
+    PreLoader *preLoader = [[PreLoader alloc] initWithFrame:CGRectMake(80, 300, 200, 200) color:[UIColor purpleColor]];
+    [self.view addSubview:preLoader];
+    
 }
 
 - (void)didReceiveMemoryWarning {
