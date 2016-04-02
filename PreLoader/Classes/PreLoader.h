@@ -21,6 +21,9 @@
 #pragma mark - Spot
 @interface Spot : UIView
 
+@property (copy, nonatomic) NSString *effectToken;
+@property (assign, nonatomic) BOOL allowChangeEffectToken;
+@property (assign, nonatomic) BOOL isFirstTimeToBlend;
 
 - (instancetype)initWithFrame:(CGRect)frame color:(UIColor *)color;
 
