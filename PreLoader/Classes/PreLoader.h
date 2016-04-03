@@ -24,6 +24,7 @@
 @property (copy, nonatomic) NSString *effectToken;
 @property (assign, nonatomic) BOOL allowChangeEffectToken;
 @property (assign, nonatomic) BOOL isFirstTimeToBlend;
+@property (assign, nonatomic) BOOL isFirstTimeToSpringBack;
 
 - (instancetype)initWithFrame:(CGRect)frame color:(UIColor *)color;
 

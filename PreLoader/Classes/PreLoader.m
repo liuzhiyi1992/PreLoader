@@ -26,11 +26,14 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
 
 @property (strong, nonatomic) NSMutableArray *movingSpots;
 @property (strong, nonatomic) UIView *stickyView;
+
 @property (strong, nonatomic) CAShapeLayer *stickyShapeLayer;
 @property (strong, nonatomic) CAShapeLayer *stickyShapeLayerRight;
+@property (strong, nonatomic) CAShapeLayer *stickyShapeLayerLeftRear;
+@property (strong, nonatomic) CAShapeLayer *stickyShapeLayerRightRear;
+
 @property (strong, nonatomic) Spot *leftFixedSpot;
 @property (strong, nonatomic) Spot *rightFixedSpot;
-@property (strong, nonatomic) Spot *testSpot;
 
 @end
 
@@ -57,7 +60,8 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
     CGFloat margin = self.bounds.size.width / 6;
     CGFloat originX = margin;
     CGFloat finalX = self.bounds.size.width - margin;
-//    CGFloat originRearX = originX - 2 * UNIT_RADIUS;
+    CGFloat originRearX = originX - 3 * UNIT_RADIUS;
+    CGFloat finalRearX = finalX + 3 * UNIT_RADIUS;
     
     
     //Fixed Spot
@@ -102,8 +106,10 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
         Spot *movingSpot = [[Spot alloc] initWithFrame:CGRectMake(originX - UNIT_RADIUS, self.bounds.size.height / 2 - UNIT_RADIUS , 2 * UNIT_RADIUS, 2 * UNIT_RADIUS) color:spotColor];
         
         CAKeyframeAnimation *anim = [CAKeyframeAnimation animationWithKeyPath:@"position.x"];
-        anim.values = @[@(originX), @(originX), @(finalX), @(finalX), @(originX), @(originX)];
-        anim.keyTimes = @[@(0.0), @(0.25), @(0.35), @(0.75), @(0.85), @(1.0)];//sleep 0.4 ratio
+        anim.values = @[@(originX), @(originX), @(finalX),    @(finalRearX), @(finalX),
+                                    @(finalX), @(originX),    @(originRearX), @(originX), @(originX)];
+        anim.keyTimes = @[@(0.0), @(0.25), @(0.35),    @(0.38), @(0.41),
+                                  @(0.75), @(0.85),    @(0.88), @(0.91), @(1.0)];//sleep 0.4 ratio
         anim.duration = PROCESS_DURING;
         anim.repeatCount = HUGE_VALF;
         anim.beginTime = CACurrentMediaTime() + i * SPOT_DELAY_RATIO * PROCESS_DURING;
@@ -113,9 +119,6 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
         
         [self.movingSpots addObject:movingSpot];
         [self addSubview:movingSpot];
-        if (i == 2) {
-           self.testSpot = movingSpot;
-        }
         
         [CATransaction begin];
         [CATransaction setDisableActions:YES];
@@ -134,8 +137,12 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
 - (void)configureStickyShapelayer {
     self.stickyShapeLayer = [[CAShapeLayer alloc] init];
     self.stickyShapeLayerRight = [[CAShapeLayer alloc] init];
+    self.stickyShapeLayerLeftRear = [[CAShapeLayer alloc] init];
+    self.stickyShapeLayerRightRear = [[CAShapeLayer alloc] init];
     [_stickyView.layer insertSublayer:_stickyShapeLayer above:_stickyView.layer];
     [_stickyView.layer insertSublayer:_stickyShapeLayerRight above:_stickyView.layer];
+    [_stickyView.layer insertSublayer:_stickyShapeLayerLeftRear above:_stickyView.layer];
+    [_stickyView.layer insertSublayer:_stickyShapeLayerRightRear above:_stickyView.layer];
 }
 
 - (void)configureDisplayLink {
@@ -156,8 +163,23 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
     [handleLayer removeAllAnimations];
     spot.isFirstTimeToBlend = NO;
 }
+
+- (void)cleanRearResidePath:(Spot *)spot {
+    CAShapeLayer *handleLayer;
+    if ([spot.effectToken isEqualToString:EFFECT_TOKEN_LEFT]) {
+        handleLayer = _stickyShapeLayerLeftRear;
+    } else {
+        handleLayer = _stickyShapeLayerRightRear;
+    }
+    handleLayer.fillColor = [UIColor whiteColor].CGColor;
+    [handleLayer removeAllAnimations];
+    spot.isFirstTimeToSpringBack = NO;
+}
                             
 - (void)displayLinkAction:(CADisplayLink *)displayLink {
+    
+    //抽到全局
+    CGFloat cdFixSpot = [self centerDistanceWithPoint:_leftFixedSpot.center another:_rightFixedSpot.center];
     
     CALayer *leftFixSpotPreLayer = _leftFixedSpot.layer.presentationLayer;
     CALayer *rightFixSpotPreLayer = _rightFixedSpot.layer.presentationLayer;
@@ -170,6 +192,7 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
     CGPoint pointRightU = CGPointMake(rightFixSpotPosition.x, rightFixSpotPosition.y - rightFixSpotPreLayer.frame.size.height/2 + COORDINATE_CORRECTION_OFFSET);
     CGPoint pointRightD = CGPointMake(rightFixSpotPosition.x, rightFixSpotPosition.y + rightFixSpotPreLayer.frame.size.height/2 - COORDINATE_CORRECTION_OFFSET);
     
+    
     //圆心距(left)
     for (Spot *movingSpot in self.movingSpots) {
         CALayer *movingSpotPreLayer = movingSpot.layer.presentationLayer;
@@ -177,11 +200,13 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
             [self circleIncirclingWithBigOne:rightFixSpotPreLayer smallOne:movingSpotPreLayer]) {
             if (movingSpot.isFirstTimeToBlend) {
                 [self cleanResiduePath:movingSpot];
+            } else if (movingSpot.isFirstTimeToSpringBack) {
+                [self cleanRearResidePath:movingSpot];
             }
             continue;
         }
         
-        CGFloat cd = [self centerDistanceWithPoint:_leftFixedSpot.layer.position another:movingSpotPreLayer.position];
+//        CGFloat cd = [self centerDistanceWithPoint:_leftFixedSpot.layer.position another:movingSpotPreLayer.position];
         CGFloat fdLeft = [self faceDistanceWithCircleLayer:leftFixSpotPreLayer another:movingSpotPreLayer];
         CGFloat fdRight = [self faceDistanceWithCircleLayer:rightFixSpotPreLayer another:movingSpotPreLayer];
         
@@ -189,7 +214,6 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
         if ([movingSpot.effectToken isEqualToString:EFFECT_TOKEN_LEFT]) {
             //排除内切圆 和 圆心距大于30 的情况
             if (fdLeft < 20) {
-                NSLog(@"%0.f----%0.f", fdLeft, cd);
 //                NSLog(@"%0.f", movingSpotPreLayer.position.x);
                 CGPoint movingSpotPosition = movingSpotPreLayer.position;
                 
@@ -203,20 +227,34 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
                 CGPoint controlPointUp = CGPointMake(controlPointX, controlPointUpY);
                 CGPoint controlPointDown = CGPointMake(controlPointX, controlPointDownY);
                 
-                UIBezierPath *stickyPath = [UIBezierPath bezierPath];
-                [stickyPath moveToPoint:pointLeftU];
-                [stickyPath addQuadCurveToPoint:pointMovingU controlPoint:controlPointUp];
-                [stickyPath addArcWithCenter:movingSpotPreLayer.position radius:movingSpotPreLayer.frame.size.width/2 startAngle:-M_PI/2 endAngle:M_PI/2 clockwise:YES];
-//                [stickyPath addLineToPoint:pointMovingD];
-                [stickyPath addQuadCurveToPoint:pointLeftD controlPoint:controlPointDown];
-                [stickyPath closePath];
-                
-                self.stickyShapeLayer.path = stickyPath.CGPath;
-                _stickyShapeLayer.fillColor = self.spotColor.CGColor;
-                [self.stickyShapeLayer removeAllAnimations];
-                //处理过，允许换令牌
-                movingSpot.allowChangeEffectToken = YES;
-                movingSpot.isFirstTimeToBlend = YES;
+                //todo 其实这里可以动态根据fixSpot的scale来改变MovingPoint的值(专门虚拟一个来做回弹).
+                if (movingSpotPosition.x < leftFixSpotPosition.x) {
+                    UIBezierPath *stickyPath = [UIBezierPath bezierPath];
+                    [stickyPath moveToPoint:pointLeftU];
+                    [stickyPath addQuadCurveToPoint:pointMovingU controlPoint:controlPointUp];
+                    [stickyPath addArcWithCenter:movingSpotPreLayer.position radius:movingSpotPreLayer.frame.size.width/2 startAngle:-M_PI/2 endAngle:M_PI/2 clockwise:NO];
+                    [stickyPath addQuadCurveToPoint:pointLeftD controlPoint:controlPointDown];
+                    [stickyPath closePath];
+                    
+                    self.stickyShapeLayerLeftRear.path = stickyPath.CGPath;
+                    _stickyShapeLayerLeftRear.fillColor = self.spotColor.CGColor;
+                    [self.stickyShapeLayerLeftRear removeAllAnimations];
+                    movingSpot.isFirstTimeToSpringBack = YES;
+                } else {
+                    UIBezierPath *stickyPath = [UIBezierPath bezierPath];
+                    [stickyPath moveToPoint:pointLeftU];
+                    [stickyPath addQuadCurveToPoint:pointMovingU controlPoint:controlPointUp];
+                    [stickyPath addArcWithCenter:movingSpotPreLayer.position radius:movingSpotPreLayer.frame.size.width/2 startAngle:-M_PI/2 endAngle:M_PI/2 clockwise:YES];
+                    [stickyPath addQuadCurveToPoint:pointLeftD controlPoint:controlPointDown];
+                    [stickyPath closePath];
+                    
+                    self.stickyShapeLayer.path = stickyPath.CGPath;
+                    _stickyShapeLayer.fillColor = self.spotColor.CGColor;
+                    [self.stickyShapeLayer removeAllAnimations];
+                    //处理过，允许换令牌
+                    movingSpot.allowChangeEffectToken = YES;
+                    movingSpot.isFirstTimeToBlend = YES;
+                }
             } else {
                 _stickyShapeLayer.fillColor = [UIColor whiteColor].CGColor;
                 [self.stickyShapeLayer removeAllAnimations];
@@ -225,6 +263,7 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
                     movingSpot.effectToken = EFFECT_TOKEN_RIGHT;
                     movingSpot.allowChangeEffectToken = NO;
                 }
+                
             }
         } else if ([movingSpot.effectToken isEqualToString:EFFECT_TOKEN_RIGHT]) {
             if (fdRight < 20) {
@@ -241,19 +280,31 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
                 CGPoint controlPointUp = CGPointMake(controlPointX, controlPointUpY);
                 CGPoint controlPointDown = CGPointMake(controlPointX, controlPointDownY);
                 
-                UIBezierPath *stickyPath = [UIBezierPath bezierPath];
-                [stickyPath moveToPoint:pointRightU];
-                [stickyPath addQuadCurveToPoint:pointMovingU controlPoint:controlPointUp];
-                [stickyPath addArcWithCenter:movingSpotPreLayer.position radius:movingSpotPreLayer.frame.size.width/2 startAngle:-M_PI/2 endAngle:M_PI/2 clockwise:NO];
-//                [stickyPath addLineToPoint:pointMovingD];
-                [stickyPath addQuadCurveToPoint:pointRightD controlPoint:controlPointDown];
-                [stickyPath closePath];
-                self.stickyShapeLayerRight.path = stickyPath.CGPath;
-                _stickyShapeLayerRight.fillColor = self.spotColor.CGColor;
-                [self.stickyShapeLayerRight removeAllAnimations];
-                //处理过，允许换令牌
-                movingSpot.allowChangeEffectToken = YES;
-                movingSpot.isFirstTimeToBlend = YES;
+                if (movingSpotPosition.x > rightFixSpotPosition.x) {
+                    UIBezierPath *stickyPath = [UIBezierPath bezierPath];
+                    [stickyPath moveToPoint:pointRightU];
+                    [stickyPath addQuadCurveToPoint:pointMovingU controlPoint:controlPointUp];
+                    [stickyPath addArcWithCenter:movingSpotPreLayer.position radius:movingSpotPreLayer.frame.size.width/2 startAngle:-M_PI/2 endAngle:M_PI/2 clockwise:YES];
+                    [stickyPath addQuadCurveToPoint:pointRightD controlPoint:controlPointDown];
+                    [stickyPath closePath];
+                    self.stickyShapeLayerRightRear.path = stickyPath.CGPath;
+                    _stickyShapeLayerRightRear.fillColor = self.spotColor.CGColor;
+                    [self.stickyShapeLayerRightRear removeAllAnimations];
+                    movingSpot.isFirstTimeToSpringBack = YES;
+                } else {
+                    UIBezierPath *stickyPath = [UIBezierPath bezierPath];
+                    [stickyPath moveToPoint:pointRightU];
+                    [stickyPath addQuadCurveToPoint:pointMovingU controlPoint:controlPointUp];
+                    [stickyPath addArcWithCenter:movingSpotPreLayer.position radius:movingSpotPreLayer.frame.size.width/2 startAngle:-M_PI/2 endAngle:M_PI/2 clockwise:NO];
+                    [stickyPath addQuadCurveToPoint:pointRightD controlPoint:controlPointDown];
+                    [stickyPath closePath];
+                    self.stickyShapeLayerRight.path = stickyPath.CGPath;
+                    _stickyShapeLayerRight.fillColor = self.spotColor.CGColor;
+                    [self.stickyShapeLayerRight removeAllAnimations];
+                    //处理过，允许换令牌
+                    movingSpot.allowChangeEffectToken = YES;
+                    movingSpot.isFirstTimeToBlend = YES;
+                }
             } else {
                 _stickyShapeLayerRight.fillColor = [UIColor whiteColor].CGColor;
                 [self.stickyShapeLayerRight removeAllAnimations];
@@ -291,10 +342,6 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
 
 - (BOOL)circleIncirclingWithBigOne:(CALayer *)bigOne smallOne:(CALayer *)smallOne {
     CGFloat cd = [self centerDistanceWithPoint:bigOne.position another:smallOne.position];
-//    BOOL flag = (cd < (bigOne.frame.size.width - smallOne.frame.size.width)/2);
-//    if (flag) {
-//        NSLog(@"%0.f", [self faceDistanceWithCircleLayer:bigOne another:smallOne]);
-//    }
     return (cd < (bigOne.frame.size.width - smallOne.frame.size.width)/2);
 }
 
