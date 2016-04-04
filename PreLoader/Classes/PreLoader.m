@@ -151,30 +151,6 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
         [_mainDisplayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
     }
 }
-
-- (void)cleanResiduePath:(Spot *)spot {
-    CAShapeLayer *handleLayer;
-    if ([spot.effectToken isEqualToString:EFFECT_TOKEN_LEFT]) {
-        handleLayer = _stickyShapeLayer;
-    } else {
-        handleLayer = _stickyShapeLayerRight;
-    }
-    handleLayer.fillColor = [UIColor whiteColor].CGColor;
-    [handleLayer removeAllAnimations];
-    spot.isFirstTimeToBlend = NO;
-}
-
-- (void)cleanRearResidePath:(Spot *)spot {
-    CAShapeLayer *handleLayer;
-    if ([spot.effectToken isEqualToString:EFFECT_TOKEN_LEFT]) {
-        handleLayer = _stickyShapeLayerLeftRear;
-    } else {
-        handleLayer = _stickyShapeLayerRightRear;
-    }
-    handleLayer.fillColor = [UIColor whiteColor].CGColor;
-    [handleLayer removeAllAnimations];
-    spot.isFirstTimeToSpringBack = NO;
-}
                             
 - (void)displayLinkAction:(CADisplayLink *)displayLink {
     
@@ -318,6 +294,30 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
         }
         
     }
+}
+
+- (void)cleanResiduePath:(Spot *)spot {
+    CAShapeLayer *handleLayer;
+    if ([spot.effectToken isEqualToString:EFFECT_TOKEN_LEFT]) {
+        handleLayer = _stickyShapeLayer;
+    } else {
+        handleLayer = _stickyShapeLayerRight;
+    }
+    handleLayer.fillColor = [UIColor whiteColor].CGColor;
+    [handleLayer removeAllAnimations];
+    spot.isFirstTimeToBlend = NO;
+}
+
+- (void)cleanRearResidePath:(Spot *)spot {
+    CAShapeLayer *handleLayer;
+    if ([spot.effectToken isEqualToString:EFFECT_TOKEN_LEFT]) {
+        handleLayer = _stickyShapeLayerLeftRear;
+    } else {
+        handleLayer = _stickyShapeLayerRightRear;
+    }
+    handleLayer.fillColor = [UIColor whiteColor].CGColor;
+    [handleLayer removeAllAnimations];
+    spot.isFirstTimeToSpringBack = NO;
 }
 
 - (void)spotChangeEffectToken:(Spot *)spot {
