@@ -17,9 +17,13 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
-    
-    PreLoader *preLoader = [[PreLoader alloc] initWithFrame:CGRectMake(80, 300, 200, 200) color:[UIColor purpleColor]];
+
+    UIColor *spotColor = [UIColor colorWithRed:235/255.0 green:77/255.0 blue:138/255.0 alpha:1.0];
+    UIColor *backgroundColor = [UIColor colorWithRed:47/255.0 green:46/255.0 blue:51/255.0 alpha:1.0];
+    PreLoader *preLoader = [[PreLoader alloc] initWithFrame:CGRectMake(80, 300, 200, 200)
+                                                      color:spotColor
+                                            backgroundColor:[UIColor clearColor]];
+    [self.view setBackgroundColor:backgroundColor];
     [self.view addSubview:preLoader];
     
 }

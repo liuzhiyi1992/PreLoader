@@ -11,7 +11,9 @@
 
 @interface PreLoader : UIView
 
-- (instancetype)initWithFrame:(CGRect)frame color:(UIColor *)color;
+- (instancetype)initWithFrame:(CGRect)frame
+                        color:(UIColor *)color
+              backgroundColor:(UIColor *)backgroundColor;
 
 @end
 
