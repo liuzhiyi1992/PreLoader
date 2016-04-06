@@ -187,7 +187,7 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
         CGFloat fdRight = [self faceDistanceWithCircleLayer:rightFixSpotPreLayer another:movingSpotPreLayer];
         
         
-        if ([movingSpot.effectToken isEqualToString:EFFECT_TOKEN_LEFT]) {
+        if (movingSpot.effectToken == EFFECT_TOKEN_LEFT) {
             //排除内切圆 和 圆心距大于30 的情况
             if (fdLeft < 20) {
                 CGPoint movingSpotPosition = movingSpotPreLayer.position;
@@ -260,7 +260,7 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
                 }
                 
             }
-        } else if ([movingSpot.effectToken isEqualToString:EFFECT_TOKEN_RIGHT]) {
+        } else if (movingSpot.effectToken == EFFECT_TOKEN_RIGHT) {
             if (fdRight < 20) {
                 CGPoint movingSpotPosition = movingSpotPreLayer.position;
                 
@@ -340,7 +340,7 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
 
 - (void)cleanResiduePath:(Spot *)spot {
     CAShapeLayer *handleLayer;
-    if ([spot.effectToken isEqualToString:EFFECT_TOKEN_LEFT]) {
+    if (spot.effectToken == EFFECT_TOKEN_LEFT) {
         handleLayer = _stickyShapeLayer;
     } else {
         handleLayer = _stickyShapeLayerRight;
@@ -352,7 +352,7 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
 
 - (void)cleanRearResidePath:(Spot *)spot {
     CAShapeLayer *handleLayer;
-    if ([spot.effectToken isEqualToString:EFFECT_TOKEN_LEFT]) {
+    if (spot.effectToken == EFFECT_TOKEN_LEFT) {
         handleLayer = _stickyShapeLayerLeftRear;
     } else {
         handleLayer = _stickyShapeLayerRightRear;
@@ -364,7 +364,7 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
 
 - (void)spotChangeEffectToken:(Spot *)spot {
     if (spot.allowChangeEffectToken) {
-        spot.effectToken = [spot.effectToken isEqualToString:EFFECT_TOKEN_LEFT] ? EFFECT_TOKEN_RIGHT : EFFECT_TOKEN_LEFT;
+        spot.effectToken = spot.effectToken == EFFECT_TOKEN_LEFT ? EFFECT_TOKEN_RIGHT : EFFECT_TOKEN_LEFT;
         spot.allowChangeEffectToken = NO;
     }
 }
