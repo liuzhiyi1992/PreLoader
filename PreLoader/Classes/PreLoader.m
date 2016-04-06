@@ -11,7 +11,7 @@
 
 int const MAX_MULTIPLE = 5;
 CGFloat const UNIT_RADIUS = 5;
-CGFloat const PROCESS_DURING = 3.5f;
+CGFloat const PROCESS_DURING = 3.6f;
 CGFloat const SPOT_DELAY_RATIO = 0.08f;    //污点弹出延迟系数
 CGFloat const SPOT_MAGNIFY_ANIM_DURATION_RATIO = 0.03f;
 CGFloat const COORDINATE_CORRECTION_OFFSET = 2.2f;      //修正path超出图形的情况
@@ -59,7 +59,7 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
     self.spotColor = spotColor;
     [self addStickyView];
     
-    CGFloat margin = self.bounds.size.width / 6;
+    CGFloat margin = self.bounds.size.width / 4;
     CGFloat originX = margin;
     CGFloat finalX = self.bounds.size.width - margin;
     CGFloat originRearX = originX - 4 * UNIT_RADIUS;
@@ -219,12 +219,17 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
                     CGPoint virtualPointMovingU = CGPointMake(movingSpotPosition.x - virtualExcursion, movingSpotPosition.y - movingSpotPreLayer.frame.size.height/2);
                     CGPoint virtualCenter = CGPointMake(movingSpotPosition.x - virtualExcursion, movingSpotPosition.y);
                     
+                    CGFloat moving45degreesX = UNIT_RADIUS * sinf(35/180.f * M_PI);
+                    CGFloat moving45degreesY = UNIT_RADIUS * cosf(35/180.f * M_PI);
+                    CGPoint moving45degreesU = CGPointMake(movingSpotPosition.x - virtualExcursion - moving45degreesX, movingSpotPosition.y - moving45degreesY);
+                    CGPoint moving45degreesD = CGPointMake(movingSpotPosition.x - virtualExcursion - moving45degreesX, movingSpotPosition.y + moving45degreesY);
                     
                     UIBezierPath *stickyPath = [UIBezierPath bezierPath];
                     [stickyPath moveToPoint:pointLeftU];
-                    [stickyPath addLineToPoint:virtualPointMovingU];
+                    [stickyPath addLineToPoint:moving45degreesU];
 //                    [stickyPath addQuadCurveToPoint:pointMovingU controlPoint:controlPointUp];
                     [stickyPath addArcWithCenter:virtualCenter radius:movingSpotPreLayer.frame.size.width/2 startAngle:-M_PI/2 endAngle:M_PI/2 clockwise:NO];
+                    [stickyPath addLineToPoint:moving45degreesD];
 //                    [stickyPath addQuadCurveToPoint:pointLeftD controlPoint:controlPointDown];
                     [stickyPath addLineToPoint:pointLeftD];
                     [stickyPath closePath];
@@ -288,20 +293,21 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
                     } else if (4 == scale) {
                         virtualExcursion = (scale - basicScale) * 0.4 * UNIT_RADIUS;
                     }
-                    CGPoint virtualPointMovingU = CGPointMake(movingSpotPosition.x + virtualExcursion, movingSpotPosition.y - movingSpotPreLayer.frame.size.height/2);
+                    
+//                    CGPoint virtualPointMovingU = CGPointMake(movingSpotPosition.x + virtualExcursion, movingSpotPosition.y - movingSpotPreLayer.frame.size.height/2);
                     CGPoint virtualCenter = CGPointMake(movingSpotPosition.x + virtualExcursion, movingSpotPosition.y);
                     
-//                    controlPointUpY = CGRectGetMinY(rightFixSpotPreLayer.frame);
-//                    controlPointDownY = CGRectGetMaxY(rightFixSpotPreLayer.frame);
-//                    controlPointUp = CGPointMake(controlPointX, controlPointUpY);
-//                    controlPointDown = CGPointMake(controlPointX, controlPointDownY);
-                    
+                    CGFloat moving45degreesXY = UNIT_RADIUS * sinf(35/180.f * M_PI);
+                    CGFloat moving45degreesY = UNIT_RADIUS * cosf(35/180.f * M_PI);
+                    CGPoint moving45degreesU = CGPointMake(movingSpotPosition.x + virtualExcursion + moving45degreesXY, movingSpotPosition.y - moving45degreesY);
+                    CGPoint moving45degreesD = CGPointMake(movingSpotPosition.x + virtualExcursion + moving45degreesXY, movingSpotPosition.y + moving45degreesY);
                     
                     UIBezierPath *stickyPath = [UIBezierPath bezierPath];
                     [stickyPath moveToPoint:pointRightU];
 //                    [stickyPath addQuadCurveToPoint:virtualPointMovingU controlPoint:controlPointUp];
-                    [stickyPath addLineToPoint:virtualPointMovingU];
+                    [stickyPath addLineToPoint:moving45degreesU];
                     [stickyPath addArcWithCenter:virtualCenter radius:movingSpotPreLayer.frame.size.width/2 startAngle:-M_PI/2 endAngle:M_PI/2 clockwise:YES];
+                    [stickyPath addLineToPoint:moving45degreesD];
 //                    [stickyPath addQuadCurveToPoint:pointRightD controlPoint:controlPointDown];
                     [stickyPath addLineToPoint:pointRightD];
                     [stickyPath closePath];
