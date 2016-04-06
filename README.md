@@ -11,3 +11,28 @@
 
 ![](https://raw.githubusercontent.com/liuzhiyi1992/MyStore/master/PreLoader/PreLoaderDisplay.gif)   
 
+<br>
+##Usage:
+```objc
+PreLoader *preLoader = [[PreLoader alloc] initWithFrame:CGRectMake(60, 300, 250, 250)
+                                                      color:spotColor
+                                            backgroundColor:[UIColor clearColor]];
+                                            
+[self.view addSubview:preLoader];
+```  
+
+<br>
+##CocoaPods:  
+```
+pod 'PreLoader', '~> 0.3.1'
+```
+
+<br>
+##Relation:  
+[@liuzhiyi1992](https://github.com/liuzhiyi1992) on Github  
+[@Blog](http://zyden.vicp.cc/)  Welcome
+
+<br>
+##License:  
+PreLoader is released under the MIT license. See LICENSE for details.
+
