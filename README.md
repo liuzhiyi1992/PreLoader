@@ -25,7 +25,7 @@ PreLoader *preLoader = [[PreLoader alloc] initWithFrame:CGRectMake(60, 300, 250,
 <br>
 ##CocoaPods:  
 ```
-pod 'PreLoader', '~> 0.3.1'
+pod 'PreLoader', '~> 0.5.1'
 ```
 
 <br>
