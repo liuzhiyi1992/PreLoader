@@ -9,7 +9,8 @@
 <br>
 <br>
 
-![](https://raw.githubusercontent.com/liuzhiyi1992/MyStore/master/PreLoader/PreLoaderDisplay.gif)   
+![](https://raw.githubusercontent.com/liuzhiyi1992/MyStore/master/PreLoader/PreLoaderDisplayWhite.gif)
+
 
 <br>
 ##Usage:
