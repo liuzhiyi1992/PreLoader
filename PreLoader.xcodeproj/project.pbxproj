@@ -14,6 +14,8 @@
 		481274EE1CAD0EFF000C708F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 481274ED1CAD0EFF000C708F /* Assets.xcassets */; };
 		481274F11CAD0EFF000C708F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 481274EF1CAD0EFF000C708F /* LaunchScreen.storyboard */; };
 		481274FB1CAD0F51000C708F /* PreLoader.m in Sources */ = {isa = PBXBuildFile; fileRef = 481274FA1CAD0F51000C708F /* PreLoader.m */; };
+		4848B35B1CD9DD220045B94C /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4848B35A1CD9DD220045B94C /* QuartzCore.framework */; };
+		4848B35D1CD9DD280045B94C /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4848B35C1CD9DD280045B94C /* UIKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,6 +31,8 @@
 		481274F21CAD0EFF000C708F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		481274F91CAD0F51000C708F /* PreLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreLoader.h; sourceTree = "<group>"; };
 		481274FA1CAD0F51000C708F /* PreLoader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PreLoader.m; sourceTree = "<group>"; };
+		4848B35A1CD9DD220045B94C /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		4848B35C1CD9DD280045B94C /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -36,6 +40,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4848B35D1CD9DD280045B94C /* UIKit.framework in Frameworks */,
+				4848B35B1CD9DD220045B94C /* QuartzCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -45,6 +51,8 @@
 		481274D51CAD0EFF000C708F = {
 			isa = PBXGroup;
 			children = (
+				4848B35C1CD9DD280045B94C /* UIKit.framework */,
+				4848B35A1CD9DD220045B94C /* QuartzCore.framework */,
 				481274E01CAD0EFF000C708F /* PreLoader */,
 				481274DF1CAD0EFF000C708F /* Products */,
 			);
