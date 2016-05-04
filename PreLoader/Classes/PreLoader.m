@@ -10,14 +10,14 @@
 #import <QuartzCore/CABase.h>
 
 int const MAX_MULTIPLE = 5;
-CGFloat const UNIT_RADIUS = 5;
-CGFloat const PROCESS_DURING = 3.6f;
-CGFloat const SPOT_DELAY_RATIO = 0.08f;    //污点弹出延迟系数
-CGFloat const SPOT_MAGNIFY_ANIM_DURATION_RATIO = 0.03f;
-CGFloat const COORDINATE_CORRECTION_OFFSET = 2.2f;      //修正path超出图形的情况
-//CGFloat const PATH_LINE_WIDTH = 50.f;
-NSString * const EFFECT_TOKEN_LEFT = @"EFFECT_TOKEN_LEFT";     //可对左边污点造成影响
-NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污点造成影响
+CGFloat const UNIT_RADIUS = 5;                                  //单位半径
+CGFloat const PROCESS_DURING = 3.6f;                            //动画时间
+CGFloat const SPOT_DELAY_RATIO = 0.08f;                         //污点弹出延迟系数
+CGFloat const SPOT_MAGNIFY_ANIM_DURATION_RATIO = 0.03f;         //污点变大间隔时间单位
+CGFloat const COORDINATE_CORRECTION_OFFSET = 2.2f;              //修正path超出图形的情况
+CGFloat const OCCUR_STICKY_DISTANCE = 20.0f;                    //触发粘连的距离
+NSString * const EFFECT_TOKEN_LEFT = @"EFFECT_TOKEN_LEFT";      //可对左边污点造成影响
+NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";    //可对右边污点造成影响
 
 
 @interface PreLoader()
@@ -157,7 +157,7 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
                             
 - (void)displayLinkAction:(CADisplayLink *)displayLink {
     //抽到全局
-    CGFloat cdFixSpot = [self centerDistanceWithPoint:_leftFixedSpot.center another:_rightFixedSpot.center];
+//    CGFloat cdFixSpot = [self centerDistanceWithPoint:_leftFixedSpot.center another:_rightFixedSpot.center];
     
     CALayer *leftFixSpotPreLayer = _leftFixedSpot.layer.presentationLayer;
     CALayer *rightFixSpotPreLayer = _rightFixedSpot.layer.presentationLayer;
@@ -189,7 +189,7 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
         
         if (movingSpot.effectToken == EFFECT_TOKEN_LEFT) {
             //排除内切圆 和 圆心距大于30 的情况
-            if (fdLeft < 20) {
+            if (fdLeft < OCCUR_STICKY_DISTANCE) {
                 CGPoint movingSpotPosition = movingSpotPreLayer.position;
                 
                 CGPoint pointMovingU = CGPointMake(movingSpotPosition.x, movingSpotPosition.y - movingSpotPreLayer.frame.size.height/2);
@@ -202,7 +202,7 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
                 CGPoint controlPointUp = CGPointMake(controlPointX, controlPointUpY);
                 CGPoint controlPointDown = CGPointMake(controlPointX, controlPointDownY);
                 
-                //todo 其实这里可以动态根据fixSpot的scale来改变MovingPoint的值(专门虚拟一个来做回弹).
+                //这里可以动态根据fixSpot的scale来改变MovingPoint的值(专门虚拟一个来做回弹).
                 if (movingSpotPosition.x < leftFixSpotPosition.x) {
                     //隐藏真实movingSpot
                     movingSpot.alpha = 0.f;
@@ -216,7 +216,8 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
                     } else if (4 == scale) {
                         virtualExcursion = (scale - basicScale) * 0.4 * UNIT_RADIUS;
                     }
-                    CGPoint virtualPointMovingU = CGPointMake(movingSpotPosition.x - virtualExcursion, movingSpotPosition.y - movingSpotPreLayer.frame.size.height/2);
+
+                    
                     CGPoint virtualCenter = CGPointMake(movingSpotPosition.x - virtualExcursion, movingSpotPosition.y);
                     
                     CGFloat moving45degreesX = UNIT_RADIUS * sinf(35/180.f * M_PI);
@@ -227,10 +228,8 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
                     UIBezierPath *stickyPath = [UIBezierPath bezierPath];
                     [stickyPath moveToPoint:pointLeftU];
                     [stickyPath addLineToPoint:moving45degreesU];
-//                    [stickyPath addQuadCurveToPoint:pointMovingU controlPoint:controlPointUp];
                     [stickyPath addArcWithCenter:virtualCenter radius:movingSpotPreLayer.frame.size.width/2 startAngle:-M_PI/2 endAngle:M_PI/2 clockwise:NO];
                     [stickyPath addLineToPoint:moving45degreesD];
-//                    [stickyPath addQuadCurveToPoint:pointLeftD controlPoint:controlPointDown];
                     [stickyPath addLineToPoint:pointLeftD];
                     [stickyPath closePath];
                     
@@ -263,10 +262,9 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
                     movingSpot.effectToken = EFFECT_TOKEN_RIGHT;
                     movingSpot.allowChangeEffectToken = NO;
                 }
-                
             }
         } else if (movingSpot.effectToken == EFFECT_TOKEN_RIGHT) {
-            if (fdRight < 20) {
+            if (fdRight < OCCUR_STICKY_DISTANCE) {
                 CGPoint movingSpotPosition = movingSpotPreLayer.position;
                 
                 CGPoint pointMovingU = CGPointMake(movingSpotPosition.x, movingSpotPosition.y - movingSpotPreLayer.frame.size.height/2);
@@ -294,7 +292,7 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
                         virtualExcursion = (scale - basicScale) * 0.4 * UNIT_RADIUS;
                     }
                     
-//                    CGPoint virtualPointMovingU = CGPointMake(movingSpotPosition.x + virtualExcursion, movingSpotPosition.y - movingSpotPreLayer.frame.size.height/2);
+                    
                     CGPoint virtualCenter = CGPointMake(movingSpotPosition.x + virtualExcursion, movingSpotPosition.y);
                     
                     CGFloat moving45degreesXY = UNIT_RADIUS * sinf(35/180.f * M_PI);
@@ -304,11 +302,9 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
                     
                     UIBezierPath *stickyPath = [UIBezierPath bezierPath];
                     [stickyPath moveToPoint:pointRightU];
-//                    [stickyPath addQuadCurveToPoint:virtualPointMovingU controlPoint:controlPointUp];
                     [stickyPath addLineToPoint:moving45degreesU];
                     [stickyPath addArcWithCenter:virtualCenter radius:movingSpotPreLayer.frame.size.width/2 startAngle:-M_PI/2 endAngle:M_PI/2 clockwise:YES];
                     [stickyPath addLineToPoint:moving45degreesD];
-//                    [stickyPath addQuadCurveToPoint:pointRightD controlPoint:controlPointDown];
                     [stickyPath addLineToPoint:pointRightD];
                     [stickyPath closePath];
                     self.stickyShapeLayerRightRear.path = stickyPath.CGPath;
@@ -443,8 +439,8 @@ NSString * const EFFECT_TOKEN_RIGHT = @"EFFECT_TOKEN_RIGHT";   //可对右边污
 @end
 
 
+
+
+
 //PreLoader is released under the MIT license.
 //Please visit https://github.com/liuzhiyi1992/PreLoader for details.
-
-
-
